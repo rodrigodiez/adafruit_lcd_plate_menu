@@ -38,7 +38,7 @@ class MenuLeaf(MenuNode):
 class MenuDisplay(object):
 	def __init__(self, nodes):
 		self.nodes = nodes
-		self.active_node = nodes.index(0)
+		self.active_node = nodes[0]
 
 	def display():
 		lcd = LCD.Adafruit_CharLCDPlate()
