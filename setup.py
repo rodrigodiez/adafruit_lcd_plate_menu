@@ -7,5 +7,5 @@ setup(name='adafruit_lcd_plate_menu',
       author_email='rodrigo@rodrigodiez.io',
       url='https://www.github.com/rodrigodiez/adafruit_lcd_plate_menu',
       py_modules=['adafruit_lcd_plate_menu'],
-      requires=['Adafruit_CharLCD>=1.0.0']
+      install_requires=['Adafruit_CharLCD>=1.0.0']
 )
