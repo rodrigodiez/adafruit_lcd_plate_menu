@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='adafruit_lcd_plate_menu',
-      version='0.1',
+      version='0.1.0',
       description='A simple yet powerful menu library for Adafruit\'s LCD plates',
       author='Rodrigo Diez Villamuera',
       author_email='rodrigo@rodrigodiez.io',
