@@ -1,5 +1,5 @@
-from simple_menu import MenuNode
-from simple_menu import MenuDisplay
+from adafruit_lcd_plate_menu import MenuNode
+from adafruit_lcd_plate_menu import MenuDisplay
 
 import requests
 
@@ -18,7 +18,6 @@ for x in range(1,11):
 		
 #  This is our menu display. It uses our previously defined menu as a data source and let us
 #  operate with it
-display = MenuDisplay(root_node)
-display.display()
+MenuDisplay(root_node).display()
 
 #  Enjoy trasversing!
