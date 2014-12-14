@@ -1,7 +1,8 @@
+import Adafruit_CharLCD as LCD
+import requests
+
 from adafruit_lcd_plate_menu import MenuNode
 from adafruit_lcd_plate_menu import CharMenuDisplay
-
-import requests
 
 #  This is a payload function. When a menu node with a payload function
 #  is selected, the function gets executed. This is done before rendering
@@ -35,6 +36,7 @@ def google_menu_build(menu_display, selected_node, *argvs):
 #  Instantiate and configure Adafruit's Char LCD Plate lib
 adafruit_char_lcd_plate = LCD.Adafruit_CharLCDPlate()
 adafruit_char_lcd_plate.set_color(0.0, 0.0, 1.0)
+adafruit_char_lcd_plate.set_backlight(True)
 
 menu_nodes = []
 
@@ -51,7 +53,6 @@ menu_nodes.append(MenuNode('London images', None, google_menu_build, 'london'))
 
 #  This is our menu display. It uses our previously defined menu as a data source and let us
 #  operate with it
-display = MenuDisplay(adafruit_char_lcd_plate, menu_nodes)
-display.display()
+CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
 
 #  Enjoy adapting it!
