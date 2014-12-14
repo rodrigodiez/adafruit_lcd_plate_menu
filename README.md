@@ -2,7 +2,7 @@
 A simple yet powerful library for bulding and displaying menus on Adafruit\'s LCD plates
 
 ## Features
-	- Easy to use. Just 3 lines to build your first menu!
+	- Easy to use. Just 1 code lines to build and display your first menu!
 	- Sub-menus, any depth. You are welcome
 	- Easily hook into menu transversion and run your code
 	- Dynamic menus. Insert new elements on the fly by using any data source you could imagine
@@ -19,10 +19,12 @@ Please take a look at the `examples` directory. You will find there ready-to-exe
 
 ### Hello world
 ```python
-from adafruit_lcd_plate_menu import MenuNode
-from adafruit_lcd_plate_menu import MenuDisplay
+import Adafruit_CharLCD as LCD
 
-MenuDisplay(MenuNode('root').add_node(MenuNode('Hello world'))).display()
+from adafruit_lcd_plate_menu import MenuNode
+from adafruit_lcd_plate_menu import CharMenuDisplay
+
+MenuDisplay(LCD.Adafruit_CharLCDPlate(), [ MenuNode('Hello world') ]).display()
 ```
 
 ### Sub-menus
