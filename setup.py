@@ -1,3 +1,4 @@
+import os
 from distutils.core import setup
 
 version_file = open(os.path.join(os.path.dirname(__file__), 'VERSION'))
