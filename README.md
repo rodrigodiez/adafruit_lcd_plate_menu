@@ -27,35 +27,46 @@ MenuDisplay(MenuNode('root').add_node(MenuNode('Hello world'))).display()
 
 ### Sub-menus
 ```python
+import Adafruit_CharLCD as LCD
+
 from adafruit_lcd_plate_menu import MenuNode
-from adafruit_lcd_plate_menu import MenuDisplay
+from adafruit_lcd_plate_menu import CharMenuDisplay
 
-#  This is our root menu node. We will build our menu structure within it
-root_node = MenuNode()
+#  Instantiate and configure Adafruit's Char LCD Plate lib
+adafruit_char_lcd_plate = LCD.Adafruit_CharLCDPlate()
+adafruit_char_lcd_plate.set_color(0.0, 0.0, 1.0)
+adafruit_char_lcd_plate.set_backlight(True)
 
-#  Ten elements in the first menu level, each of them with 10 childs
+#  Here we create ten menu nodes, each of them with ten childs
+#  each of them, again, with ten sub-menus
+menu_nodes = []
 for x in range(1,11):
-	child = MenuNode('Menu %d' % (x))
+	menu = MenuNode('Menu %d' % (x))
 
 	for y in range(1,11):
-		sub_child = MenuNode('Child %d-%d' % (x, y))
-		child.add_node(sub_child)
+		sub_menu = MenuNode('Menu %d-%d' % (x, y))
 
-	root_node.add_node(child)
+		for z in range(1,11):
+			sub_sub_menu = MenuNode('Menu %d-%d-%d' % (x,y,z))
+			sub_menu.add_node(sub_sub_menu)
+
+		menu.add_node(sub_menu)
+
+	menu_nodes.append(menu)
 		
-#  This is our menu display. It uses our previously defined menu as a data source and let us
-#  operate with it
-MenuDisplay(root_node).display()
+#  This is our menu display
+CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
 
-#  Enjoy trasversing!
+#  Enjoy trasversing the menu!
 ```
 
 ### Code execution and dynamic menu building
 ```python
-from adafruit_lcd_plate_menu import MenuNode
-from adafruit_lcd_plate_menu import MenuDisplay
-
+import Adafruit_CharLCD as LCD
 import requests
+
+from adafruit_lcd_plate_menu import MenuNode
+from adafruit_lcd_plate_menu import CharMenuDisplay
 
 #  This is a payload function. When a menu node with a payload function
 #  is selected, the function gets executed. This is done before rendering
@@ -84,35 +95,34 @@ def google_menu_build(menu_display, selected_node, *argvs):
 	for result in data['responseData']['results']:
 		selected_node.add_node(MenuNode(result['titleNoFormatting']))
 
-	# you could even draw or change LCD settings here
-	# menu_display.lcd.set_color(1.0, 0.0, 0.0)
-
 	return
 
-#  This is our root menu node. We will build our menu structure within it
-root_node = MenuNode()
+#  Instantiate and configure Adafruit's Char LCD Plate lib
+adafruit_char_lcd_plate = LCD.Adafruit_CharLCDPlate()
+adafruit_char_lcd_plate.set_color(0.0, 0.0, 1.0)
+adafruit_char_lcd_plate.set_backlight(True)
+
+menu_nodes = []
 
 #  This node, when rendered, will display 'Raspberry images' as its title.
 #  When selected, 'google_menu_build' function will be executed and
 #  'raspberry' will be provided as an argument to query google
-root_node.add_node(MenuNode('Raspberry images', None, google_menu_build, 'raspberry'))
+menu_nodes.append(MenuNode('Raspberry images', None, google_menu_build, 'raspberry'))
 
 #  Same as above, but using 'python' as query
-root_node.add_node(MenuNode('Python images', None, google_menu_build, 'python'))
+menu_nodes.append(MenuNode('Python images', None, google_menu_build, 'python'))
 
 #  Same as above, but using 'london' as query
-root_node.add_node(MenuNode('London images', None, google_menu_build, 'london'))
+menu_nodes.append(MenuNode('London images', None, google_menu_build, 'london'))
 
 #  This is our menu display. It uses our previously defined menu as a data source and let us
 #  operate with it
-display = MenuDisplay(root_node)
-display.display()
-
+CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
 
 #  Enjoy adapting it!
 ```
 
 ## Know issues
 	- This library is still under development and may be subject to change at any time. Use it at your own risk
-	- Currently only 16x2 LCD is supported but that might change if people are interested
+	- Currently only 16x2 char LCD is supported but that might change if people are interested
 	- Menu items label length is currently limited at 15 characters

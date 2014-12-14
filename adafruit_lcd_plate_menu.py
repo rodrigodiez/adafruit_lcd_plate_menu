@@ -33,20 +33,19 @@ class MenuNode(object):
 		if callable(self.payloadFn):
 			self.payloadFn(display, self, *self.payloadArgvs)
 
-class MenuDisplay(object):
+class CharMenuDisplay(object):
 
-	def __init__(self, root_node):
-		self.highlighted_node = root_node.nodes[0]
+	def __init__(self, adafruit_char_lcd_plate, nodes):
+		if nodes is None:
+			nodes = []
+
+		self.root_node = MenuNode(nodes=nodes)
+		self.highlighted_node = self.root_node.nodes[0]
 		self.highlighted_index = 0;
-		self.context_node = root_node
-		self.root = root_node
+		self.context_node = self.root_node
 
-		self.lcd = LCD.Adafruit_CharLCDPlate()
-		self.lcd.autoscroll(False)
+		self.lcd = adafruit_char_lcd_plate
 		self.lcd.create_char(1, [0,8,12,14,12,8,0,0])
-		self.lcd.create_char(2, [0,10,17,21,17,10,0,0])
-
-		self.lcd.set_color(1.0, 1.0, 1.0)
 
 	def display(self):
 
@@ -90,8 +89,8 @@ class MenuDisplay(object):
 			
 			if self.lcd.is_pressed(LCD.SELECT):
 
-				self.context_node = self.root
-				self._highlight_node(self.root.nodes[0])
+				self.context_node = self.root_node
+				self._highlight_node(self.context_node.nodes[0])
 				self._draw()
 
 			time.sleep(0.1)

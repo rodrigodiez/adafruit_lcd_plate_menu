@@ -1,7 +1,8 @@
-from adafruit_lcd_plate_menu import MenuNode
-from adafruit_lcd_plate_menu import MenuDisplay
-
+import Adafruit_CharLCD as LCD
 import requests
+
+from adafruit_lcd_plate_menu import MenuNode
+from adafruit_lcd_plate_menu import CharMenuDisplay
 
 #  This is a payload function. When a menu node with a payload function
 #  is selected, the function gets executed. This is done before rendering
@@ -32,24 +33,26 @@ def google_menu_build(menu_display, selected_node, *argvs):
 
 	return
 
-#  This is our root menu node. We will build our menu structure within it
-root_node = MenuNode()
+#  Instantiate and configure Adafruit's Char LCD Plate lib
+adafruit_char_lcd_plate = LCD.Adafruit_CharLCDPlate()
+adafruit_char_lcd_plate.set_color(0.0, 0.0, 1.0)
+adafruit_char_lcd_plate.set_backlight(True)
+
+menu_nodes = []
 
 #  This node, when rendered, will display 'Raspberry images' as its title.
 #  When selected, 'google_menu_build' function will be executed and
 #  'raspberry' will be provided as an argument to query google
-root_node.add_node(MenuNode('Raspberry images', None, google_menu_build, 'raspberry'))
+menu_nodes.append(MenuNode('Raspberry images', None, google_menu_build, 'raspberry'))
 
 #  Same as above, but using 'python' as query
-root_node.add_node(MenuNode('Python images', None, google_menu_build, 'python'))
+menu_nodes.append(MenuNode('Python images', None, google_menu_build, 'python'))
 
 #  Same as above, but using 'london' as query
-root_node.add_node(MenuNode('London images', None, google_menu_build, 'london'))
+menu_nodes.append(MenuNode('London images', None, google_menu_build, 'london'))
 
 #  This is our menu display. It uses our previously defined menu as a data source and let us
 #  operate with it
-display = MenuDisplay(root_node)
-display.display()
-
+CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
 
 #  Enjoy adapting it!
