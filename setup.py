@@ -15,7 +15,7 @@ setup(
     packages=[],
     install_requires=['Adafruit_CharLCD>=1.0.0'],
     classifiers=[
-		'Development Status :: 3 - Alpha'
+		'Development Status :: 3 - Alpha',
 		'Environment :: Console',
 		'Intended Audience :: Developers',
 		'License :: OSI Approved :: MIT License',
