@@ -1,8 +1,6 @@
-import os
 from distutils.core import setup
 
-version_file = open(os.path.join(os.path.dirname(__file__), 'VERSION'))
-version = version_file.read().strip()
+version='0.1.7' 
 
 setup(
     name="adafruit_lcd_plate_menu",
