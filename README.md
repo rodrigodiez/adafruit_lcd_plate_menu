@@ -9,9 +9,7 @@ A simple yet powerful library for bulding and displaying menus on Adafruit\'s LC
 
 ## Installation
 ```shell
-git clone git@github.com:rodrigodiez/adafruit_lcd_plate_menu.py
-cd adafruit_lcd_plate_menu
-python setup.py install
+pip install adafruit-lcd-plate-menu
 ```
 
 ## Examples
