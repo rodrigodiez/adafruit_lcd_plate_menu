@@ -52,48 +52,54 @@ class CharMenuDisplay(object):
 		self._draw()
 
 		while True:
-			
-			if self.lcd.is_pressed(LCD.DOWN):
+			try:
+				if self.lcd.is_pressed(LCD.DOWN):
 
-				if(self.highlighted_index < len(self.context_node.nodes) - 1):
-					self._highlight_node(self.context_node.nodes[self.highlighted_index + 1])
-					self._draw()
-				else:
-					self._blink()	
-			
-			if self.lcd.is_pressed(LCD.UP):
+					if(self.highlighted_index < len(self.context_node.nodes) - 1):
+						self._highlight_node(self.context_node.nodes[self.highlighted_index + 1])
+						self._draw()
+					else:
+						self._blink()	
+				
+				if self.lcd.is_pressed(LCD.UP):
 
-				if(self.highlighted_index > 0):
-					self._highlight_node(self.context_node.nodes[self.highlighted_index - 1])
-					self._draw()
-				else:
-					self._blink()
+					if(self.highlighted_index > 0):
+						self._highlight_node(self.context_node.nodes[self.highlighted_index - 1])
+						self._draw()
+					else:
+						self._blink()
 
-			if self.lcd.is_pressed(LCD.RIGHT):
+				if self.lcd.is_pressed(LCD.RIGHT):
 
-				self.highlighted_node.payload(self)
+					self.highlighted_node.payload(self)
 
-				if len(self.highlighted_node.nodes) > 0:
+					if len(self.highlighted_node.nodes) > 0:
 
-					self.context_node = self.highlighted_node
+						self.context_node = self.highlighted_node
+						self._highlight_node(self.context_node.nodes[0])
+						self._draw()
+
+				if self.lcd.is_pressed(LCD.LEFT):
+
+					if self.context_node.parent is not None:
+
+						self.context_node = self.context_node.parent
+						self._highlight_node(self.highlighted_node.parent)
+						self._draw()
+				
+				if self.lcd.is_pressed(LCD.SELECT):
+
+					self.context_node = self.root_node
 					self._highlight_node(self.context_node.nodes[0])
 					self._draw()
 
-			if self.lcd.is_pressed(LCD.LEFT):
-
-				if self.context_node.parent is not None:
-
-					self.context_node = self.context_node.parent
-					self._highlight_node(self.highlighted_node.parent)
-					self._draw()
+				time.sleep(0.1)
 			
-			if self.lcd.is_pressed(LCD.SELECT):
+			except KeyboardInterrupt, SystemExit:
+				self.lcd.enable_display(False)
+				self.lcd.set_backlight(False)
+				raise
 
-				self.context_node = self.root_node
-				self._highlight_node(self.context_node.nodes[0])
-				self._draw()
-
-			time.sleep(0.1)
 
 	def _blink(self):
 		self.lcd.set_backlight(False)
