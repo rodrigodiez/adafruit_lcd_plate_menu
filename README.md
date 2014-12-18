@@ -126,4 +126,3 @@ CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
 ## Know issues
 	- This library is still under development and may be subject to change at any time. Use it at your own risk
 	- Currently only 16x2 char LCD is supported but that might change if people are interested
-	- Menu items label length is currently limited at 15 characters
