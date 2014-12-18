@@ -3,9 +3,10 @@ A simple yet powerful library for bulding and displaying menus on Adafruit\'s LC
 
 ## Features
 	- Easy to use. Just 1 code lines to build and display your first menu!
-	- Sub-menus, any depth. You are welcome
-	- Easily hook into menu transversion and run your code
-	- Dynamic menus. Insert new elements on the fly by using any data source you could imagine
+	- Sub-menus, any depth
+	- Autoscroll
+	- Easily run your code when a node is selected
+	- Dynamic menus. Build on the fly by using any data source you could imagine
 
 ## Installation
 ```shell
@@ -125,4 +126,3 @@ CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
 ## Know issues
 	- This library is still under development and may be subject to change at any time. Use it at your own risk
 	- Currently only 16x2 char LCD is supported but that might change if people are interested
-	- Menu items label length is currently limited at 15 characters

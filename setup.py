@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version='0.1.9' 
+version='2.0.1' 
 
 setup(
     name="adafruit_lcd_plate_menu",
