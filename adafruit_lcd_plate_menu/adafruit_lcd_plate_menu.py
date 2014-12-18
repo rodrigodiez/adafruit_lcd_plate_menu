@@ -1,5 +1,6 @@
 import Adafruit_CharLCD as LCD
 import time
+import threading
 
 class MenuNode(object):
 	def __init__(self, label='', nodes=None, payloadFn=None, *payloadArgvs):
@@ -43,6 +44,7 @@ class CharMenuDisplay(object):
 		self.highlighted_node = self.root_node.nodes[0]
 		self.highlighted_index = 0;
 		self.context_node = self.root_node
+		self.scroller = None
 
 		self.lcd = adafruit_char_lcd_plate
 		self.lcd.create_char(1, [0,8,12,14,12,8,0,0])
@@ -96,10 +98,12 @@ class CharMenuDisplay(object):
 				time.sleep(0.1)
 			
 			except KeyboardInterrupt, SystemExit:
+				if self.scroller is not None:
+					self.scroller.join()
+
 				self.lcd.enable_display(False)
 				self.lcd.set_backlight(False)
 				raise
-
 
 	def _blink(self):
 		self.lcd.set_backlight(False)
@@ -107,12 +111,23 @@ class CharMenuDisplay(object):
 		self.lcd.set_backlight(True)
 
 	def _draw(self):
+
+		if(self.scroller is not None):
+			self.scroller.join()
+
 		self.lcd.clear()
-		
+
+
+		nodes_to_scroll = [self.highlighted_node]
 		self._draw_node(self.highlighted_node, 0)
 
 		if self.highlighted_index < (len(self.context_node.nodes) -1):
+			nodes_to_scroll.append(self.context_node.nodes[self.highlighted_index + 1])
 			self._draw_node(self.context_node.nodes[self.highlighted_index + 1], 1)
+
+		self.scroller = DisplayScroller(self.lcd, nodes_to_scroll)
+		self.scroller.daemon = True
+		self.scroller.start()
 
 	def _highlight_node(self, node):
 		self.highlighted_node = node
@@ -130,6 +145,57 @@ class CharMenuDisplay(object):
 
 		for char in node.label[:15]:
 			self.lcd.write8(ord(char), True)
+
+
+class DisplayScroller(threading.Thread):
+	def __init__(self, lcd, nodes):
+		threading.Thread.__init__(self)
+		self.lcd = lcd
+		self.nodes = nodes
+		self.stop = threading.Event()
+
+	def join(self):
+		self.stop.set()
+		super(DisplayScroller, self).join()
+
+	def run(self):
+		time.sleep(0.5)
+
+		nodeOffsets = []
+		for node in self.nodes:
+
+			nodeOffsets.append(0)
+
+		while(not self.stop.isSet()):
+
+			for node in self.nodes:
+
+				nodeIndex = self.nodes.index(node)
+				labelSlice = node.label[nodeOffsets[nodeIndex]:][:15]
+				self.lcd.set_cursor(1, nodeIndex)
+				
+				for char in labelSlice:
+
+					self.lcd.write8(ord(char), True)
+
+				if len(node.label) > 15:
+
+					self.lcd.set_cursor(len(labelSlice) + 1, nodeIndex)
+
+					for space in range(15 - (len(labelSlice) -1)):
+
+						self.lcd.write8(ord(' '), True)
+
+				nodeOffsets[nodeIndex] += 1
+
+				if len(node.label[nodeOffsets[nodeIndex]:][:15]) < 15:
+
+					nodeOffsets[nodeIndex] = 0
+			
+			time.sleep(0.3)
+
+
+
 
 
 
