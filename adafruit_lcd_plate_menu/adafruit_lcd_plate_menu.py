@@ -3,7 +3,7 @@ import time
 import threading
 
 class MenuNode(object):
-	def __init__(self, label='', nodes=None, payloadFn=None, *payloadArgvs):
+	def __init__(self, label='', nodes=None, controllerFn=None, *controllerArgvs):
 
 		self.label = label
 		self.parent = None
@@ -16,8 +16,8 @@ class MenuNode(object):
 		for node in self.nodes:
 			node._set_parent(self)
 
-		self.payloadFn = payloadFn
-		self.payloadArgvs = payloadArgvs
+		self.controllerFn = controllerFn
+		self.controllerArgvs = controllerArgvs
 
 	def add_node(self, node):
 		self.nodes.append(node)
@@ -30,124 +30,80 @@ class MenuNode(object):
 
 		return self
 
-	def payload(self, display):
-		if callable(self.payloadFn):
-			self.payloadFn(display, self, *self.payloadArgvs)
+	def run(self, container):
+		if callable(self.controllerFn):
+			self.controllerFn(container, *self.controllerArgvs)
 
-class CharMenuDisplay(object):
-
-	def __init__(self, adafruit_char_lcd_plate, nodes):
+class MenuRouter(object):
+	def __init__(self, nodes, container):	
 		if nodes is None:
 			nodes = []
 
-		self.root_node = MenuNode(nodes=nodes)
-		self.highlighted_node = self.root_node.nodes[0]
-		self.highlighted_index = 0;
-		self.context_node = self.root_node
-		self.scroller = None
-
-		self.lcd = adafruit_char_lcd_plate
-		self.lcd.create_char(1, [0,8,12,14,12,8,0,0])
-
-	def display(self):
-
-		self._draw()
-
-		while True:
-			try:
-				if self.lcd.is_pressed(LCD.DOWN):
-
-					if(self.highlighted_index < len(self.context_node.nodes) - 1):
-						self._highlight_node(self.context_node.nodes[self.highlighted_index + 1])
-						self._draw()
-					else:
-						self._blink()	
-				
-				if self.lcd.is_pressed(LCD.UP):
-
-					if(self.highlighted_index > 0):
-						self._highlight_node(self.context_node.nodes[self.highlighted_index - 1])
-						self._draw()
-					else:
-						self._blink()
-
-				if self.lcd.is_pressed(LCD.RIGHT):
-
-					self.highlighted_node.payload(self)
-
-					if len(self.highlighted_node.nodes) > 0:
-
-						self.context_node = self.highlighted_node
-						self._highlight_node(self.context_node.nodes[0])
-						self._draw()
-
-				if self.lcd.is_pressed(LCD.LEFT):
-
-					if self.context_node.parent is not None:
-
-						self.context_node = self.context_node.parent
-						self._highlight_node(self.highlighted_node.parent)
-						self._draw()
-				
-				if self.lcd.is_pressed(LCD.SELECT):
-
-					self.context_node = self.root_node
-					self._highlight_node(self.context_node.nodes[0])
-					self._draw()
-
-				time.sleep(0.1)
-			
-			except KeyboardInterrupt, SystemExit:
-				if self.scroller is not None:
-					self.scroller.join()
-
-				self.lcd.enable_display(False)
-				self.lcd.set_backlight(False)
-				raise
-
-	def _blink(self):
-		self.lcd.set_backlight(False)
-		time.sleep(0.1)
-		self.lcd.set_backlight(True)
-
-	def _draw(self):
-
-		if(self.scroller is not None):
-			self.scroller.join()
-
-		self.lcd.clear()
-
-
-		nodes_to_scroll = [self.highlighted_node]
-		self._draw_node(self.highlighted_node, 0)
-
-		if self.highlighted_index < (len(self.context_node.nodes) -1):
-			nodes_to_scroll.append(self.context_node.nodes[self.highlighted_index + 1])
-			self._draw_node(self.context_node.nodes[self.highlighted_index + 1], 1)
-
-		self.scroller = DisplayScroller(self.lcd, nodes_to_scroll)
-		self.scroller.daemon = True
-		self.scroller.start()
+		self._root_node = MenuNode(nodes=nodes)
+		self._highlighted_node = self._root_node.nodes[0]
+		self._highlighted_index = 0;
+		self._context_node = self._root_node
+		self._scroller = None
 
 	def _highlight_node(self, node):
-		self.highlighted_node = node
-		self.highlighted_index = self.context_node.nodes.index(node)
+		self._highlighted_node = node
+		self._highlighted_index = self._context_node.nodes.index(node)
 
-	def _draw_node(self, node, line):
-		self.lcd.set_cursor(1, line)
+	def nodeIn(self):
+		self._highlighted_node.run(container)
 
-		if node is self.highlighted_node:
-			self.lcd.set_cursor(0, line)
+		if len(self._highlighted_node.nodes) > 0:
 
-			icon = '\x01'
+			self._context_node = self._highlighted_node
+			self._highlight_node(self._context_node.nodes[0])
+		
+		container.get('renderer')->render()
 
-			self.lcd.write8(ord(icon), True)
+	def nodeOut(self):
+		if self._context_node.parent is not None:
 
-		for char in node.label[:15]:
-			self.lcd.write8(ord(char), True)
+			self._context_node = self._context_node.parent
+			self._highlight_node(self._highlighted_node.parent)
+			container.get('renderer')->render()
+		else:
+			container.get('renderer')->blink()
+
+	def nodePrevious(self):
+		if(self._highlighted_index > 0):
+			self._highlight_node(self._context_node.nodes[self._highlighted_index - 1])
+			container.get('renderer')->render()
+		else:
+			container.get('renderer')->blink()
+
+	def nodeFirst(self):
+		if(self._highlighted_index > 0):
+			self._highlight_node(self._context_node.nodes[0])
+			container.get('renderer')->render()
+		else:
+			container.get('renderer')->blink()
+
+	def nodeNext(self):
+		if(self._highlighted_index < len(self._context_node.nodes) - 1):
+			self._highlight_node(self._context_node.nodes[self._highlighted_index + 1])
+			container.get('renderer')->render()
+		else:
+			container.get('renderer')->blink()
+
+	def nodeLast(self):
+		if(self._highlighted_index < len(self._context_node.nodes) - 1):
+			self._highlight_node(self._context_node.nodes[len(self._context_node.nodes) - 1])
+			container.get('renderer')->render()
+		else:
+			container.get('renderer')->blink()
+
+	def home(self):
+
+		self._context_node = self._root_node
+		self._highlight_node(self._context_node.nodes[0])
+		container.get('renderer')->render()
 
 
-class DisplayScroller(threading.Thread):
+class MenuDisplayScroller(threading.Thread):
 	def __init__(self, lcd, nodes):
 		threading.Thread.__init__(self)
 		self.lcd = lcd
@@ -156,7 +112,7 @@ class DisplayScroller(threading.Thread):
 
 	def join(self):
 		self.stop.set()
-		super(DisplayScroller, self).join()
+		super(MenuDisplayScroller, self).join()
 
 	def run(self):
 		time.sleep(0.5)
@@ -192,11 +148,77 @@ class DisplayScroller(threading.Thread):
 
 					nodeOffsets[nodeIndex] = 0
 			
-			time.sleep(0.3)
+			time.sleep(0.1)
 
 
+class AdafruitLCDPlateDisplayHandler(object):
+	def __init__(self, menu_display):
+		self._menu_display = menu_display
+		self._lcd = menu_display.lcd 
+
+	def handle(self):
+		self._menu_display.home()
+
+		while True:
+			try:
+				if self._lcd.is_pressed(LCD.DOWN):
+
+					self._menu_display.nodeNext()
+				
+				if self._lcd.is_pressed(LCD.UP):
+
+					self._menu_display.nodePrevious()
+
+				if self._lcd.is_pressed(LCD.RIGHT):
+
+					self._menu_display.nodeIn()
+
+				if self._lcd.is_pressed(LCD.LEFT):
+
+					self._menu_display.nodeOut()
+				
+				if self._lcd.is_pressed(LCD.SELECT):
+
+					self._menu_display.home()
+
+				time.sleep(0.1)
+			
+			except KeyboardInterrupt, SystemExit:
+				self._menu_display.shutdown()
+				raise
 
 
+class ConsoleDisplayHandler(object):
+	def __init__(self, menu_display):
+		self._menu_display = menu_display
 
+	def handle(self):
+		self._menu_display.home()
 
+		while True:
+			try:
 
+				action = raw_input('What would you like to do? (previous / next / first / last / in / out / home)\n')
+
+				if action == 'next':
+					self._menu_display.nodeNext()
+				elif action == 'previous':
+					self._menu_display.nodePrevious()
+				elif action == 'in':
+					self._menu_display.nodeIn()
+				elif action == 'out':
+					self._menu_display.nodeOut()
+				elif action == 'home':
+					self._menu_display.home()
+				elif action == 'first':
+					self._menu_display.nodeFirst()
+				elif action == 'last':
+					self._menu_display.nodeLast()
+				else:
+					print('Unknown action\n')
+
+				time.sleep(0.1)
+			
+			except KeyboardInterrupt, SystemExit:
+				self._menu_display.shutdown()
+				raise

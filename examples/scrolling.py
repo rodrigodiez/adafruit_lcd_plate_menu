@@ -3,7 +3,9 @@ import Adafruit_CharLCD as LCD
 import random, string
 
 from adafruit_lcd_plate_menu import MenuNode
-from adafruit_lcd_plate_menu import CharMenuDisplay
+from adafruit_lcd_plate_menu import MenuDisplay
+from adafruit_lcd_plate_menu import AdafruitLCDPlateDisplayHandler
+
 
 #  Instantiate and configure Adafruit's Char LCD Plate lib
 adafruit_char_lcd_plate = LCD.Adafruit_CharLCDPlate()
@@ -14,13 +16,14 @@ adafruit_char_lcd_plate.set_backlight(True)
 #  each of them, again, with ten sub-menus
 menu_nodes = []
 
-label = 'ABCDEFGHIJKLMNOPQRSTU'
+label = 'This is a node with a long label just to see it scrolling :)'
 menu = MenuNode(label)
 menu_nodes.append(menu)
 		
-label = 'ABCDEFGHIJKLMNOPQ'
+label = 'Short label'
 menu = MenuNode(label)
 menu_nodes.append(menu)
 
 #  This is our menu display
-CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
+display = MenuDisplay(menu_nodes, adafruit_char_lcd_plate)
+AdafruitLCDPlateDisplayHandler(display).handle()

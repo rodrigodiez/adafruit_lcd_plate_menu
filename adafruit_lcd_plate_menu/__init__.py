@@ -1,2 +1,4 @@
 from adafruit_lcd_plate_menu import MenuNode
-from adafruit_lcd_plate_menu import CharMenuDisplay
+from adafruit_lcd_plate_menu import MenuDisplay
+from adafruit_lcd_plate_menu import AdafruitLCDPlateDisplayHandler
+from adafruit_lcd_plate_menu import ConsoleDisplayHandler

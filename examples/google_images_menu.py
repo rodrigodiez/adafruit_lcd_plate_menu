@@ -2,7 +2,8 @@ import Adafruit_CharLCD as LCD
 import requests
 
 from adafruit_lcd_plate_menu import MenuNode
-from adafruit_lcd_plate_menu import CharMenuDisplay
+from adafruit_lcd_plate_menu import MenuDisplay
+from adafruit_lcd_plate_menu import AdafruitLCDPlateDisplayHandler
 
 #  This is a payload function. When a menu node with a payload function
 #  is selected, the function gets executed. This is done before rendering
@@ -53,6 +54,9 @@ menu_nodes.append(MenuNode('London images', None, google_menu_build, 'london'))
 
 #  This is our menu display. It uses our previously defined menu as a data source and let us
 #  operate with it
-CharMenuDisplay(adafruit_char_lcd_plate, menu_nodes).display()
+display = MenuDisplay(menu_nodes, adafruit_char_lcd_plate)
+
+AdafruitLCDPlateDisplayHandler(display).handle()
+
 
 #  Enjoy adapting it!
